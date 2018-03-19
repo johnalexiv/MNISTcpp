@@ -298,4 +298,5 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-*.idx
+*.idx3-ubyte
+*.idx1-ubyte
