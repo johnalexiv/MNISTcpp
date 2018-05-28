@@ -15,6 +15,7 @@ public:
 	bool readMnistData(string);
 	bool readMnistLabel(string);
 	vector<double> getImage();
+	vector<vector<double>> getImage2D();
 	vector<double> getLabel();
 	int getNumberOfImages();
 	int width();

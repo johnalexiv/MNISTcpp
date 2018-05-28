@@ -13,9 +13,9 @@ int main()
 	if (train) {
 		string imageFilename = "train-images.idx3-ubyte";
 		string labelFilename = "train-labels.idx1-ubyte";
-		NeuralNetwork model(imageFilename, labelFilename, 50, 0.005);
+		NeuralNetwork model(imageFilename, labelFilename, 50, 0.02);
 
-		int numOfEpochs = 50;
+		int numOfEpochs = 10;
 		model.train(numOfEpochs);
 	}
 	else {
@@ -29,10 +29,10 @@ int main()
 		auto numImages = mnist.getNumberOfImages();
 		int correct = 0;
 		int total = 0;
-		for (int i = 0; i < numImages; i++) {
-			auto image = mnist.getImage();
+		for (int i = 0; i < 10; i++) {
+			auto image = mnist.getImage2D();
 			auto label = mnist.getLabel();
-			auto index = model.prediction(image, label);
+			auto index = model.prediction(image, label, true);
 			if (label[index] == 1)
 				correct++;
 			total++;

@@ -101,11 +101,35 @@ vector<double> MNIST::getImage() {
 		nextImageindex = 0;
 
 	int counter = 0;
-	for (int i = currentImageIndex; i < nextImageindex; i++) 
+	for (int i = currentImageIndex; i < nextImageindex; i++)
 		image[counter++] = images[i];
 
 	currentImageIndex = nextImageindex;
 	return image;
+}
+
+vector<vector<double>> MNIST::getImage2D() {
+	vector<double> image(784);
+	int nextImageindex = currentImageIndex + 784;
+
+	if (nextImageindex >= images.size())
+		nextImageindex = 0;
+
+	int counter = 0;
+	for (int i = currentImageIndex; i < nextImageindex; i++)
+		image[counter++] = images[i];
+
+	currentImageIndex = nextImageindex;
+
+	vector<vector<double>> image2D(28, vector<double>(28));
+
+	for (int i = 0; i < image.size(); i++) {
+		int row = i / 28;
+		int col = i % 28;
+		image2D[row][col] = image[i];
+	}
+
+	return image2D;
 }
 
 vector<double> MNIST::getLabel() {
