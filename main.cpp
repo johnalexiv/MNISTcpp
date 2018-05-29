@@ -13,7 +13,7 @@ int main()
 	if (train) {
 		string imageFilename = "train-images.idx3-ubyte";
 		string labelFilename = "train-labels.idx1-ubyte";
-		NeuralNetwork model(imageFilename, labelFilename, 50, 0.02);
+		NeuralNetwork model(imageFilename, labelFilename, 100, 0.01);
 
 		int numOfEpochs = 10;
 		model.train(numOfEpochs);
@@ -21,7 +21,7 @@ int main()
 	else {
 		string imageFilename = "t10k-images.idx3-ubyte";
 		string labelFilename = "t10k-labels.idx1-ubyte";
-		NeuralNetwork model(50);
+		NeuralNetwork model(100);
 		MNIST mnist(imageFilename, labelFilename);
 
 		model.loadWeights("weights.txt");

@@ -226,7 +226,7 @@ NeuralNetwork::~NeuralNetwork() {
 
 vector<vector<double>> NeuralNetwork::conv(const vector<vector<double>> &image, int numFeatureMap) {
 	
-	vector<vector<double>> output(image.size() - kernel.size() + 1, vector<double>(image.size() - kernel.size() + 1));
+	vector<vector<double>> output(image.size() - kernel[0].size() + 1, vector<double>(image.size() - kernel[0].size() + 1));
 
 	for (int i = 0; i < image.size() - kernel[numFeatureMap].size() + 1; i++) {
 		for (int j = 0; j < image[i].size() - kernel[numFeatureMap].size() + 1; j++) {
@@ -343,16 +343,16 @@ vector<vector<vector<double>>> NeuralNetwork::unflatten(const vector<double> &im
 }
 
 vector<vector<double>> NeuralNetwork::kernelDelta(const vector<vector<double>> &image, const vector<vector<double>> &p1, const vector<int> &pos) {
-	vector<vector<double>> output(kernel.size(), vector<double>(kernel.size()));
+	vector<vector<double>> output(kernel[0].size(), vector<double>(kernel[0].size()));
 
-	(kernel.size(), vector<double>(kernel.size()));
+	//(kernel.size(), vector<double>(kernel.size()));
 	for (int i = 0; i < pos.size(); i += 2) {
 		int x_pos = pos[i];
 		int y_pos = pos[i + 1];
 
-		for (int j = 0; j < kernel.size(); j++)
+		for (int j = 0; j < kernel[0].size(); j++)
 		{
-			for (int k = 0; k < kernel.size(); k++)
+			for (int k = 0; k < kernel[0].size(); k++)
 			{
 				output[j][k] += (p1[x_pos / 2][y_pos / 2] * image[j + (x_pos)][k + (y_pos)]);
 			}
@@ -427,7 +427,7 @@ void NeuralNetwork::backPropagation(const vector<vector<double>> &image, const v
 		a1[i] = hyperbolicTan(y1[i]);
 
 	vector<vector<int>> pos(numFeatureMaps);
-	vector<vector<vector<double>>> m1;
+	vector<vector<vector<double>>> m1(numFeatureMaps);
 	for (int i = 0; i < numFeatureMaps; i++)
 		m1[i] = maxPool(a1[i], pos[i]);
 
@@ -546,58 +546,66 @@ Inputs: image: vector containing the image pixels [1, 784]
 Output: vector, [1, Number of Classes] containing predictions
 from neural network.
 */
-//int NeuralNetwork::prediction(const vector<vector<double>> &image, const vector<double> &label, bool verbose) {
-//	const int imageSize = image.size();
-//
-//	vector<vector<double>> y1 = conv(image);
-//	vector<vector<double>> a1 = hyperbolicTan(y1);
-//
-//	vector<int> pos;
-//	vector<vector<double>> m1 = maxPool(a1, pos);
-//
-//	vector<double> f1 = flatten(m1);
-//
-//	vector<double> y2 = dot(f1, hiddenWeights, 1, f1.size(), numHiddenLayerNeurons) + hiddenBias;
-//	vector<double> a2 = hyperbolicTan(y2);
-//
-//	vector<double> y3 = dot(a2, outputWeights, 1, numHiddenLayerNeurons, numOutputLayerNeurons) + outputBias;
-//	vector<double> output = hyperbolicTan(y3);
-//
-//	vector<double> error = label - output;
-//
-//	double sum = 0.0;
-//	for (int i = 0; i < label.size(); i++) {
-//		sum += pow((label[i] - output[i]), 2.0);
-//	}
-//
-//	if (verbose) {
-//		cout << "image: " << endl;
-//		printImage(image);
-//		cout << "output: ";
-//		print(output, 1, 10);
-//		cout << "label: ";
-//		print(label, 1, 10);
-//		cout << "error: ";
-//		print(error, 1, 10);
-//		cout << "overall error: " << sum / 10.0 << endl;
-//	}
-//
-//	double max = output[0];
-//	int index = 0;
-//	for (int i = 1; i < output.size(); i++) {
-//		if (output[i] > max) {
-//			max = output[i];
-//			index = i;
-//		}
-//	}
-//
-//	if (verbose) {
-//		cout << "prediction: " << index << endl;
-//		cout << endl;
-//	}
-//
-//	return index;
-//}
+int NeuralNetwork::prediction(const vector<vector<double>> &image, const vector<double> &label, bool verbose) {
+	const int imageSize = image.size();
+
+	vector<vector<vector<double>>> y1(numFeatureMaps);
+
+	for (int i = 0; i < numFeatureMaps; i++)
+		y1[i] = conv(image, i);
+
+	vector<vector<vector<double>>> a1(numFeatureMaps);
+	for (int i = 0; i < numFeatureMaps; i++)
+		a1[i] = hyperbolicTan(y1[i]);
+
+	vector<vector<int>> pos(numFeatureMaps);
+	vector<vector<vector<double>>> m1(numFeatureMaps);
+	for (int i = 0; i < numFeatureMaps; i++)
+		m1[i] = maxPool(a1[i], pos[i]);
+
+	vector<double> f1 = flatten(m1);
+
+	vector<double> y2 = dot(f1, hiddenWeights, 1, f1.size(), numHiddenLayerNeurons) + hiddenBias;
+	vector<double> a2 = hyperbolicTan(y2);
+
+	vector<double> y3 = dot(a2, outputWeights, 1, numHiddenLayerNeurons, numOutputLayerNeurons) + outputBias;
+	vector<double> output = hyperbolicTan(y3);
+
+	vector<double> error = label - output;
+
+	double sum = 0.0;
+	for (int i = 0; i < label.size(); i++) {
+		sum += pow((label[i] - output[i]), 2.0);
+	}
+
+	if (verbose) {
+		cout << "image: " << endl;
+		printImage(image);
+		cout << "output: ";
+		print(output, 1, 10);
+		cout << "label: ";
+		print(label, 1, 10);
+		cout << "error: ";
+		print(error, 1, 10);
+		cout << "overall error: " << sum / 10.0 << endl;
+	}
+
+	double max = output[0];
+	int index = 0;
+	for (int i = 1; i < output.size(); i++) {
+		if (output[i] > max) {
+			max = output[i];
+			index = i;
+		}
+	}
+
+	if (verbose) {
+		cout << "prediction: " << index << endl;
+		cout << endl;
+	}
+
+	return index;
+}
 
 void NeuralNetwork::loadWeights(const string fileName) {
 	ifstream file;
@@ -653,10 +661,10 @@ void NeuralNetwork::saveWeights() {
 	if (file.is_open()) {
 		cout << "Saving weights..." << endl;
 
-		file << kernel.size() << endl;
+		file << kernel[0].size() << endl;
 		for (int k = 0; k < numFeatureMaps; k++)
-			for (int i = 0; i < kernel.size(); i++)
-				for (int j = 0; j < kernel.size(); j++)
+			for (int i = 0; i < kernel[0].size(); i++)
+				for (int j = 0; j < kernel[0].size(); j++)
 					file << kernel[k][i][j] << endl;
 
 		file << hiddenWeights.size() << endl;
@@ -689,12 +697,12 @@ void NeuralNetwork::initializeWeights() {
 	normal_distribution<double> distribution(0, 0.16);
 
 	for (int k = 0; k < numFeatureMaps; k++)
-		for (int i = 0; i < kernel.size(); i++)
-			for (int j = 0; j < kernel[i].size(); j++)
+		for (int i = 0; i < kernel[0].size(); i++)
+			for (int j = 0; j < kernel[0].size(); j++)
 				kernel[k][i][j] = distribution(generator);
 	for (int k = 0; k < numFeatureMaps; k++)
-		for (int i = 0; i < convBias.size(); i++)
-			for (int j = 0; j < convBias[i].size(); j++)
+		for (int i = 0; i < convBias[0].size(); i++)
+			for (int j = 0; j < convBias[0].size(); j++)
 				convBias[k][i][j] = distribution(generator);
 
 	for (int i = 0; i < hiddenBias.size(); i++)

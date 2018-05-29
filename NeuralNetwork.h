@@ -15,7 +15,7 @@ public:
 	~NeuralNetwork();
 
 	int prediction(const vector<double> &image, const vector<double> &label, bool verbose = false);
-	//int prediction(const vector<vector<double>> &image, const vector<double> &label, bool verbose = false);
+	int prediction(const vector<vector<double>> &image, const vector<double> &label, bool verbose = false);
 	void loadWeights(const string fileName);
 	void train(const int numberEpochs);
 
